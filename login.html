@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#065f46">
+<link rel="manifest" href="manifest.json">
+<title>IRSYADUL ULUM — Login</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Amiri:wght@700&display=swap" rel="stylesheet">
+<style>
+* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+body { font-family:'Inter',sans-serif; min-height:100vh; color:#0f172a;
+  background:linear-gradient(135deg,#064e3b 0%,#065f46 40%,#0891b2 100%);
+  display:flex; align-items:center; justify-content:center;
+  padding:24px; position:relative; overflow:hidden; -webkit-font-smoothing:antialiased; }
+body::before { content:''; position:absolute; inset:0;
+  background-image: radial-gradient(circle at 15% 20%, rgba(245,158,11,.15), transparent 45%),
+    radial-gradient(circle at 85% 80%, rgba(16,185,129,.18), transparent 45%); pointer-events:none; }
+body::after { content:''; position:absolute; inset:0; pointer-events:none;
+  background-image: radial-gradient(circle at 20% 30%, rgba(255,255,255,.04) 2px, transparent 2px),
+    radial-gradient(circle at 70% 60%, rgba(255,255,255,.04) 2px, transparent 2px);
+  background-size: 120px 120px, 180px 180px; }
+.login-container { width:100%; max-width:440px; position:relative; z-index:1; }
+.brand-header { text-align:center; margin-bottom:26px; animation: fi .6s; }
+@keyframes fi { from{opacity:0;transform:translateY(-16px)} to{opacity:1;transform:translateY(0)} }
+.logo-circle { width:96px; height:96px; margin:0 auto 18px;
+  background:linear-gradient(135deg,#f59e0b,#d97706); border-radius:50%;
+  display:flex; align-items:center; justify-content:center; font-size:48px;
+  box-shadow:0 20px 48px -12px rgba(245,158,11,.6),0 0 0 8px rgba(255,255,255,.1),0 0 0 16px rgba(255,255,255,.05);
+  animation: pulse 3s ease-in-out infinite; }
+@keyframes pulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.05)} }
+.brand-title { font-size:32px; font-weight:900; letter-spacing:2px; color:#fff; margin-bottom:6px;
+  background:linear-gradient(135deg,#fff,#fef3c7); -webkit-background-clip:text; -webkit-text-fill-color:transparent; text-shadow:0 4px 20px rgba(0,0,0,.35); }
+.brand-sub { font-size:12px; color:rgba(255,255,255,.8); font-weight:500; letter-spacing:1.5px; text-transform:uppercase; }
+.brand-arab { font-family:'Amiri',serif; font-size:16px; color:rgba(255,255,255,.65); margin-top:10px; font-weight:700; }
+.login-card { background:rgba(255,255,255,.97); backdrop-filter: blur(24px); border-radius:28px; padding:32px 28px;
+  box-shadow:0 32px 80px -16px rgba(0,0,0,.55),0 0 0 1px rgba(255,255,255,.15),inset 0 1px 0 rgba(255,255,255,.6);
+  animation: su .6s .1s backwards; }
+@keyframes su { from{opacity:0;transform:translateY(30px)} to{opacity:1;transform:translateY(0)} }
+.form-group { margin-bottom:16px; position:relative; }
+.form-group label { font-size:11px; font-weight:800; margin-bottom:8px; color:#065f46;
+  text-transform:uppercase; letter-spacing:1px; display:flex; align-items:center; gap:6px; }
+.form-group label::before { content:''; width:6px; height:6px; border-radius:50%; background:#f59e0b; }
+.form-group input { width:100%; padding:14px 16px 14px 46px; border:1.5px solid rgba(148,163,184,.3);
+  border-radius:14px; font-size:15px; outline:none; transition:.2s; background:rgba(248,250,252,.8);
+  color:#0f172a; font-family:inherit; font-weight:500; }
+.form-group input:focus { border-color:#065f46; background:#fff; box-shadow:0 0 0 4px rgba(6,95,70,.12); transform:translateY(-1px); }
+.input-icon { position:absolute; left:16px; top:calc(50% + 6px); transform:translateY(-50%); font-size:16px; opacity:.6; pointer-events:none; }
+.btn-login { width:100%; padding:16px; border:none; border-radius:14px;
+  background:linear-gradient(135deg,#065f46,#10b981); color:#fff; font-size:15px; font-weight:800;
+  letter-spacing:.5px; cursor:pointer; transition:.2s; font-family:inherit;
+  box-shadow:0 12px 28px -8px rgba(6,95,70,.55); position:relative; overflow:hidden; }
+.btn-login:hover { transform:translateY(-2px); }
+.btn-login:active { transform:translateY(0) scale(.98); }
+.btn-login:disabled { opacity:.6; cursor:not-allowed; }
+.error-msg { background:linear-gradient(135deg,rgba(239,68,68,.12),rgba(220,38,38,.06));
+  color:#b91c1c; padding:12px 14px; border-radius:12px; font-size:13px; font-weight:600;
+  margin-bottom:16px; display:none; border-left:4px solid #ef4444; line-height:1.5; }
+.hint-card { margin-top:20px; padding:14px 16px; border-radius:14px;
+  background:linear-gradient(135deg, rgba(6,95,70,.06), rgba(16,185,129,.04));
+  border:1px dashed rgba(6,95,70,.18); font-size:12px; color:#475569; line-height:1.8; }
+.hint-card b { color:#065f46; font-weight:800; font-size:11.5px; letter-spacing:.5px; text-transform:uppercase; }
+.hint-card code { background:#fff; padding:2px 7px; border-radius:6px; font-family:'SF Mono',Menlo,monospace;
+  font-size:11px; color:#065f46; border:1px solid rgba(148,163,184,.3); font-weight:700; }
+.demo-accounts { display:grid; gap:6px; margin-top:10px; }
+.demo-item { padding:8px 12px; border-radius:10px; font-size:11.5px; background:#fff;
+  border:1px solid rgba(148,163,184,.3); display:flex; align-items:center; justify-content:space-between;
+  font-weight:600; cursor:pointer; transition:.2s; }
+.demo-item:hover { border-color:#065f46; background:rgba(6,95,70,.04); }
+.demo-item .role { color:#065f46; font-weight:800; }
+.demo-item .cred { color:#94a3b8; font-family:'SF Mono',Menlo,monospace; font-size:10.5px; }
+.footer { text-align:center; margin-top:24px; font-size:11px; color:rgba(255,255,255,.7); font-weight:500; }
+.footer .credit { display:inline-block; padding:4px 12px; border-radius:20px;
+  background:rgba(255,255,255,.1); backdrop-filter: blur(10px); margin-top:8px; }
+@media (max-width:480px) { .brand-title{font-size:26px} .logo-circle{width:80px;height:80px;font-size:40px} .login-card{padding:26px 20px} }
+</style>
+</head>
+<body>
+<div class="login-container">
+  <div class="brand-header">
+    <div class="logo-circle">📗</div>
+    <h1 class="brand-title">IRSYADUL ULUM</h1>
+    <div class="brand-sub">Sistem Absensi & Informasi Madrasah</div>
+    <div class="brand-arab">﷽</div>
+  </div>
+  <div class="login-card">
+    <div class="error-msg" id="loginError"></div>
+    <form id="loginForm" autocomplete="on">
+      <div class="form-group">
+        <label>Username</label>
+        <input type="text" id="username" placeholder="NIP / Email / Username" autocomplete="username" required>
+        <span class="input-icon">👤</span>
+      </div>
+      <div class="form-group">
+        <label>No. WhatsApp</label>
+        <input type="tel" id="wa" placeholder="08xxxxxxxxxx" inputmode="numeric" autocomplete="tel" required>
+        <span class="input-icon">📱</span>
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <input type="password" id="password" placeholder="Masukkan password" autocomplete="current-password" required>
+        <span class="input-icon">🔒</span>
+      </div>
+      <button type="submit" class="btn-login" id="btnLogin">🔐 MASUK</button>
+    </form>
+    <div class="hint-card">
+      <b>💡 Panduan Login</b><br>
+      Password default: <code>irsyad123</code><br>
+      Klik akun untuk mengisi otomatis:
+      <div class="demo-accounts">
+        <div class="demo-item" onclick="fillLogin('admin','6281234567890')">
+          <span class="role">👑 Admin</span><span class="cred">admin · 6281234567890</span>
+        </div>
+        <div class="demo-item" onclick="fillLogin('198501012010011001','6281234500001')">
+          <span class="role">👨‍🏫 Guru</span><span class="cred">NIP Budi · 6281234500001</span>
+        </div>
+        <div class="demo-item" onclick="fillLogin('fauzi','628111111111')">
+          <span class="role">👨‍👩‍👧 Ortu</span><span class="cred">fauzi · 628111111111</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="footer">
+    © <span id="yearNow"></span> Madrasah IRSYADUL ULUM
+    <div class="credit">SIABSEN v7</div>
+  </div>
+</div>
+<script src="seed.js"></script>
+<script>
+const $ = id => document.getElementById(id);
+$('yearNow').textContent = new Date().getFullYear();
+
+function normalizeWA(wa) {
+  let s = String(wa || '').replace(/\D/g, '');
+  if (s.startsWith('0')) s = '62' + s.slice(1);
+  if (!s.startsWith('62')) s = '62' + s;
+  return s;
+}
+function fillLogin(user, wa) {
+  $('username').value = user;
+  $('wa').value = wa;
+  $('password').value = 'irsyad123';
+  $('loginError').style.display = 'none';
+  $('username').focus();
+}
+$('loginForm').addEventListener('submit', e => {
+  e.preventDefault();
+  const err = $('loginError');
+  err.style.display = 'none';
+  const username = $('username').value.trim();
+  const waInput = $('wa').value.trim();
+  const password = $('password').value;
+  if (!username || !waInput || !password) { err.textContent='⚠️ Semua field wajib diisi'; err.style.display='block'; return; }
+  const waNorm = normalizeWA(waInput);
+  if (waNorm.length < 10) { err.textContent='⚠️ Nomor WhatsApp tidak valid'; err.style.display='block'; return; }
+  const btn = $('btnLogin');
+  btn.disabled = true;
+  btn.textContent = '⏳ Memeriksa...';
+  setTimeout(() => {
+    const guruList = JSON.parse(localStorage.getItem('siabsen_guru') || '[]');
+    const guru = guruList.find(g => {
+      const uM = g.nip === username || (g.email||'').toLowerCase() === username.toLowerCase();
+      const wM = normalizeWA(g.wa||'') === waNorm;
+      const pM = g.password === password;
+      return uM && wM && pM;
+    });
+    if (guru) {
+      const session = { role: guru.role || 'guru', nip: guru.nip, nama: guru.nama, email: guru.email, wa: guru.wa, loginAt: new Date().toISOString() };
+      localStorage.setItem('siabsen_user', JSON.stringify(session));
+      redirect(guru.role === 'admin' ? 'admin.html' : 'index.html', `Selamat datang, ${guru.nama}`);
+      return;
+    }
+    const ortuList = JSON.parse(localStorage.getItem('siabsen_ortu') || '[]');
+    const ortu = ortuList.find(o => {
+      const uM = (o.username||'').toLowerCase() === username.toLowerCase() ||
+                 (o.email||'').toLowerCase() === username.toLowerCase() || o.hp === username;
+      const wM = normalizeWA(o.wa||'') === waNorm;
+      const pM = o.password === password;
+      return uM && wM && pM;
+    });
+    if (ortu) {
+      const session = { role: 'orang_tua', id: ortu.id, nama: ortu.nama, email: ortu.email, wa: ortu.wa, loginAt: new Date().toISOString() };
+      localStorage.setItem('siabsen_user', JSON.stringify(session));
+      redirect('parent.html', `Assalamu'alaikum, ${ortu.nama}`);
+      return;
+    }
+    btn.disabled = false;
+    btn.textContent = '🔐 MASUK';
+    err.innerHTML = '❌ <b>Kredensial tidak cocok.</b><br>Pastikan Username, No WA, dan Password benar.<br>Password default: <code>irsyad123</code>';
+    err.style.display = 'block';
+  }, 400);
+});
+function redirect(url, msg) {
+  document.body.innerHTML = `<div style="position:fixed;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:20px;background:linear-gradient(135deg,#064e3b,#065f46);color:#fff;font-family:Inter,sans-serif;text-align:center;padding:24px">
+    <div style="width:80px;height:80px;border-radius:50%;background:linear-gradient(135deg,#10b981,#059669);display:flex;align-items:center;justify-content:center;font-size:40px">✓</div>
+    <div style="font-size:18px;font-weight:800">${msg}</div>
+    <div style="font-size:13px;opacity:.75">Mengalihkan...</div>
+  </div>`;
+  setTimeout(() => location.href = url, 900);
+}
+if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(()=>{}));
+</script>
+</body>
+</html>
