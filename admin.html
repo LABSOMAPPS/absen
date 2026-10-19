@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#4f46e5">
+<link rel="manifest" href="manifest.json">
+<title>SIABSEN — Admin IRSYADUL ULUM</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+<script src="seed.js"></script>
+<style>
+:root { --primary:#6366f1; --primary-2:#8b5cf6; --success:#10b981; --warning:#f59e0b; --danger:#ef4444; --info:#06b6d4; --bg:#f5f6fb; --card:rgba(255,255,255,.75); --card-solid:#fff; --text:#0f172a; --text-2:#475569; --muted:#94a3b8; --border:rgba(148,163,184,.22); --border-2:rgba(148,163,184,.35); --shadow-sm:0 1px 3px rgba(15,23,42,.06); --shadow-md:0 4px 6px -1px rgba(15,23,42,.06); --shadow-lg:0 12px 24px -8px rgba(15,23,42,.12); --shadow-xl:0 24px 48px -12px rgba(15,23,42,.18); }
+[data-theme="dark"] { --bg:#0b1020; --card:rgba(30,41,59,.7); --card-solid:#1e293b; --text:#f1f5f9; --text-2:#cbd5e1; --muted:#64748b; --border:rgba(148,163,184,.15); --border-2:rgba(148,163,184,.25); --shadow-xl:0 24px 48px rgba(0,0,0,.6); }
+* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+body { font-family:'Inter',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; -webkit-font-smoothing:antialiased; }
+body::before { content:''; position:fixed; inset:0; z-index:-1; pointer-events:none; background:radial-gradient(800px circle at 10% 0%, rgba(99,102,241,.15), transparent 40%), radial-gradient(600px circle at 90% 100%, rgba(139,92,246,.12), transparent 40%); }
+.hidden { display:none !important; }
+.topbar { position:sticky; top:0; z-index:50; background:linear-gradient(135deg, rgba(79,70,229,.95), rgba(124,58,237,.95)); backdrop-filter: blur(20px); color:#fff; padding:14px 20px; display:flex; align-items:center; justify-content:space-between; box-shadow:0 4px 20px -4px rgba(99,102,241,.4); padding-top: max(14px, env(safe-area-inset-top)); }
+.topbar .brand { display:flex; align-items:center; gap:10px; font-weight:800; font-size:17px; }
+.topbar .brand .ico { font-size:24px; }
+.badge-admin { background:linear-gradient(135deg,#f59e0b,#ef4444); color:#fff; padding:3px 10px; border-radius:20px; font-size:10px; font-weight:800; letter-spacing:.5px; margin-left:8px; }
+.user-info { display:flex; align-items:center; gap:10px; }
+.avatar { width:36px; height:36px; border-radius:12px; background:rgba(255,255,255,.22); display:flex; align-items:center; justify-content:center; font-weight:800; font-size:15px; border:1.5px solid rgba(255,255,255,.3); }
+.uname { font-size:13px; font-weight:600; }
+.btn-icon { background:rgba(255,255,255,.18); color:#fff; border:1.5px solid rgba(255,255,255,.25); width:36px; height:36px; border-radius:12px; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:16px; transition:.2s; }
+.btn-icon:hover { background:rgba(255,255,255,.32); }
+.content { padding:20px; max-width:1400px; margin:0 auto; padding-bottom:60px; }
+.tabs { display:flex; gap:4px; margin-bottom:20px; background:var(--card); border:1px solid var(--border); padding:5px; border-radius:16px; overflow-x:auto; }
+.tab { flex:1; min-width:110px; padding:12px 10px; border:none; background:transparent; border-radius:12px; font-weight:700; font-size:12.5px; cursor:pointer; color:var(--muted); transition:.25s; font-family:inherit; white-space:nowrap; }
+.tab.active { background:linear-gradient(135deg,#6366f1,#8b5cf6); color:#fff; box-shadow:0 6px 18px -4px rgba(99,102,241,.5); }
+.overview-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:14px; margin-bottom:20px; }
+.ov-card { background:var(--card); border:1px solid var(--border); border-radius:20px; padding:20px; box-shadow:var(--shadow-sm); position:relative; overflow:hidden; transition:.25s; }
+.ov-card:hover { transform:translateY(-4px); box-shadow:var(--shadow-lg); }
+.ov-card::before { content:''; position:absolute; top:0; left:0; right:0; height:4px; background:var(--accent, var(--primary)); }
+.ov-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; }
+.ov-icon { width:48px; height:48px; border-radius:14px; display:flex; align-items:center; justify-content:center; font-size:24px; background:var(--icon-bg, rgba(99,102,241,.12)); }
+.ov-trend { font-size:11px; font-weight:700; padding:3px 9px; border-radius:20px; background:rgba(16,185,129,.12); color:#047857; }
+.ov-value { font-size:32px; font-weight:900; letter-spacing:-1.5px; color:var(--accent, var(--text)); line-height:1; }
+.ov-label { font-size:12px; color:var(--text-2); margin-top:6px; font-weight:600; }
+.charts-grid { display:grid; grid-template-columns:2fr 1fr; gap:16px; margin-bottom:20px; }
+.chart-card { background:var(--card); border:1px solid var(--border); border-radius:20px; padding:20px; box-shadow:var(--shadow-sm); display:flex; flex-direction:column; }
+.chart-card h3 { font-size:14px; font-weight:800; margin-bottom:16px; display:flex; align-items:center; justify-content:space-between; }
+.chart-card h3 small { font-size:11px; color:var(--muted); padding:4px 10px; background:rgba(148,163,184,.1); border-radius:20px; }
+.chart-wrap { position:relative; flex:1; min-height:260px; }
+.row-2col { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:20px; }
+.table-card { background:var(--card); border:1px solid var(--border); border-radius:20px; padding:20px; box-shadow:var(--shadow-sm); margin-bottom:20px; }
+.table-card h3 { font-size:14px; font-weight:800; margin-bottom:14px; }
+.table-wrap { overflow-x:auto; border-radius:14px; border:1px solid var(--border); background:var(--card-solid); }
+table { width:100%; border-collapse:collapse; font-size:13px; }
+th, td { padding:12px 14px; text-align:left; border-bottom:1px solid var(--border); }
+th { background:linear-gradient(180deg, rgba(99,102,241,.06), rgba(99,102,241,.02)); font-weight:800; font-size:11px; text-transform:uppercase; color:var(--text-2); letter-spacing:.5px; }
+tbody tr:last-child td { border-bottom:none; }
+tbody tr:hover { background:rgba(99,102,241,.04); }
+.rank-badge { display:inline-flex; align-items:center; justify-content:center; width:28px; height:28px; border-radius:9px; font-weight:800; font-size:12px; }
+.rank-1 { background:linear-gradient(135deg,#fbbf24,#f59e0b); color:#fff; }
+.rank-2 { background:linear-gradient(135deg,#cbd5e1,#94a3b8); color:#fff; }
+.rank-3 { background:linear-gradient(135deg,#d97706,#92400e); color:#fff; }
+.rank-n { background:rgba(148,163,184,.15); color:var(--text-2); }
+.pill { display:inline-block; padding:4px 10px; border-radius:20px; font-size:11px; font-weight:800; }
+.pill.h { background:rgba(16,185,129,.15); color:#047857; }
+.pill.i { background:rgba(6,182,212,.15); color:#0e7490; }
+.pill.s { background:rgba(245,158,11,.15); color:#b45309; }
+.pill.a { background:rgba(239,68,68,.15); color:#b91c1c; }
+[data-theme="dark"] .pill.h { color:#34d399; } [data-theme="dark"] .pill.i { color:#22d3ee; }
+[data-theme="dark"] .pill.s { color:#fbbf24; } [data-theme="dark"] .pill.a { color:#f87171; }
+.action-bar { display:flex; gap:10px; margin-bottom:16px; flex-wrap:wrap; }
+.btn { padding:13px 18px; border:none; border-radius:14px; font-size:13px; font-weight:700; cursor:pointer; transition:.2s; display:inline-flex; align-items:center; justify-content:center; gap:6px; font-family:inherit; }
+.btn:hover { transform:translateY(-1px); }
+.btn-primary { background:linear-gradient(135deg,#6366f1,#8b5cf6); color:#fff; box-shadow:0 8px 20px -6px rgba(99,102,241,.6); }
+.btn-outline { background:var(--card-solid); color:var(--text); border:1.5px solid var(--border-2); }
+.kelas-list { display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:12px; }
+.kelas-card { background:var(--card); border:1px solid var(--border); border-radius:18px; padding:16px; box-shadow:var(--shadow-sm); border-left:4px solid var(--primary); }
+.kelas-head { display:flex; align-items:center; gap:12px; margin-bottom:10px; }
+.kelas-icon { width:44px; height:44px; border-radius:12px; font-size:22px; display:flex; align-items:center; justify-content:center; background:linear-gradient(135deg,rgba(99,102,241,.15),rgba(139,92,246,.1)); }
+.kelas-info { flex:1; min-width:0; }
+.kelas-nama { font-weight:800; font-size:14.5px; }
+.kelas-guru { font-size:12px; color:var(--text-2); margin-top:3px; }
+.kelas-actions { display:flex; gap:5px; }
+.kelas-meta { display:flex; flex-wrap:wrap; gap:5px; }
+.badge-mapel, .badge-siswa { display:inline-block; padding:4px 10px; border-radius:20px; font-size:10.5px; font-weight:700; }
+.badge-mapel { background:rgba(99,102,241,.12); color:var(--primary); }
+.badge-siswa { background:rgba(16,185,129,.12); color:#047857; }
+[data-theme="dark"] .badge-siswa { color:#34d399; }
+.btn-mini { padding:7px 11px; font-size:11px; border-radius:9px; border:none; font-weight:700; cursor:pointer; font-family:inherit; }
+.btn-mini-edit { background:rgba(99,102,241,.15); color:var(--primary); }
+.btn-mini-del { background:rgba(239,68,68,.15); color:#dc2626; }
+.modal-overlay { position:fixed; inset:0; background:rgba(15,23,42,.65); backdrop-filter: blur(6px); display:flex; align-items:center; justify-content:center; padding:16px; z-index:200; }
+.modal-card { background:var(--card-solid); border-radius:24px; width:100%; max-width:520px; max-height:92vh; display:flex; flex-direction:column; box-shadow:var(--shadow-xl); overflow:hidden; border:1px solid var(--border); }
+.modal-head { padding:16px 20px; display:flex; align-items:center; justify-content:space-between; background:linear-gradient(135deg,#4f46e5,#7c3aed); color:#fff; }
+.modal-head h3 { font-size:15px; font-weight:800; }
+.modal-close { background:rgba(255,255,255,.2); color:#fff; border:none; width:32px; height:32px; border-radius:10px; cursor:pointer; font-size:16px; }
+.modal-body { padding:20px; overflow-y:auto; flex:1; }
+.modal-foot { padding:14px 20px; border-top:1px solid var(--border); display:flex; gap:10px; justify-content:flex-end; background:rgba(248,250,252,.6); }
+[data-theme="dark"] .modal-foot { background:rgba(15,23,42,.5); }
+.form-group { margin-bottom:16px; }
+.form-group label { display:block; font-size:12px; font-weight:700; margin-bottom:7px; color:var(--text-2); text-transform:uppercase; letter-spacing:.5px; }
+.form-group input, .form-group select, .form-group textarea { width:100%; padding:13px 15px; border:1.5px solid var(--border-2); border-radius:12px; font-size:14px; background:var(--card-solid); color:var(--text); outline:none; font-family:inherit; }
+[data-theme="dark"] .form-group input, [data-theme="dark"] .form-group select, [data-theme="dark"] .form-group textarea { background:rgba(15,23,42,.5); }
+#toast { position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(120px); background:linear-gradient(135deg,#0f172a,#1e293b); color:#fff; padding:14px 24px; border-radius:14px; font-size:14px; font-weight:600; z-index:999; transition:.35s; opacity:0; box-shadow:0 20px 40px -8px rgba(0,0,0,.5); max-width:90vw; }
+#toast.show { transform:translateX(-50%) translateY(0); opacity:1; }
+.empty { text-align:center; padding:60px 20px; color:var(--muted); }
+.empty .ico { font-size:60px; margin-bottom:14px; opacity:.4; }
+@media (max-width:900px) { .charts-grid { grid-template-columns:1fr; } .row-2col { grid-template-columns:1fr; } }
+@media (max-width:640px) { .content { padding:14px; } .overview-grid { grid-template-columns:1fr 1fr; gap:10px; } .ov-value { font-size:24px; } .uname { display:none; } .tab { min-width:90px; font-size:11px; } .chart-wrap { min-height:220px; } }
+</style>
+</head>
+<body>
+<div id="appPage" class="hidden">
+  <div class="topbar">
+    <div class="brand"><span class="ico">👑</span> IRSYADUL ULUM <span class="badge-admin">ADMIN</span></div>
+    <div class="user-info">
+      <div class="avatar" id="userAvatar">A</div>
+      <div class="uname" id="userName">Admin</div>
+      <button class="btn-icon" id="themeToggle">🌙</button>
+      <button class="btn-icon" id="logoutBtn">⏻</button>
+    </div>
+  </div>
+  <div class="content">
+    <div class="tabs">
+      <button class="tab active" data-tab="dashboard">📊 Dashboard</button>
+      <button class="tab" data-tab="guru">👨‍🏫 Guru</button>
+      <button class="tab" data-tab="kelas">🏫 Kelas</button>
+      <button class="tab" data-tab="siswa">👥 Siswa</button>
+      <button class="tab" data-tab="ortu">👨‍👩‍👧 Ortu</button>
+      <button class="tab" data-tab="pengumuman">📢 Pengumuman</button>
+      <button class="tab" data-tab="laporan">📄 Laporan</button>
+    </div>
+    <div id="tabDashboard">
+      <div class="overview-grid">
+        <div class="ov-card" style="--accent:#6366f1;--icon-bg:rgba(99,102,241,.12)"><div class="ov-header"><div class="ov-icon">👨‍🏫</div><div class="ov-trend" id="trendGuru">—</div></div><div class="ov-value" id="ovGuru">0</div><div class="ov-label">Total Guru</div></div>
+        <div class="ov-card" style="--accent:#8b5cf6;--icon-bg:rgba(139,92,246,.12)"><div class="ov-header"><div class="ov-icon">🏫</div><div class="ov-trend" id="trendKelas">—</div></div><div class="ov-value" id="ovKelas">0</div><div class="ov-label">Total Kelas</div></div>
+        <div class="ov-card" style="--accent:#06b6d4;--icon-bg:rgba(6,182,212,.12)"><div class="ov-header"><div class="ov-icon">👥</div><div class="ov-trend" id="trendSiswa">—</div></div><div class="ov-value" id="ovSiswa">0</div><div class="ov-label">Total Siswa</div></div>
+        <div class="ov-card" style="--accent:#10b981;--icon-bg:rgba(16,185,129,.12)"><div class="ov-header"><div class="ov-icon">📝</div><div class="ov-trend" id="trendAbsen">—</div></div><div class="ov-value" id="ovAbsen">0</div><div class="ov-label">Absensi Hari Ini</div></div>
+      </div>
+      <div class="charts-grid">
+        <div class="chart-card"><h3>📈 Tren Kehadiran <small>14 Hari Terakhir</small></h3><div class="chart-wrap"><canvas id="chartTrend"></canvas></div></div>
+        <div class="chart-card"><h3>🎯 Distribusi Status</h3><div class="chart-wrap"><canvas id="chartPie"></canvas></div></div>
+      </div>
+      <div class="row-2col">
+        <div class="chart-card"><h3>🏫 Kehadiran per Kelas</h3><div class="chart-wrap"><canvas id="chartKelas"></canvas></div></div>
+        <div class="chart-card"><h3>👨‍🏫 Absensi per Guru</h3><div class="chart-wrap"><canvas id="chartGuru"></canvas></div></div>
+      </div>
+      <div class="row-2col">
+        <div class="table-card"><h3>🏆 Top 5 Siswa Terbaik</h3><div class="table-wrap"><table><thead><tr><th>#</th><th>Nama</th><th>Kelas</th><th style="text-align:center">%</th></tr></thead><tbody id="topSiswaBody"></tbody></table></div></div>
+        <div class="table-card"><h3>⚠️ Top 5 Paling Sering Alpha</h3><div class="table-wrap"><table><thead><tr><th>#</th><th>Nama</th><th>Kelas</th><th style="text-align:center">Alpha</th></tr></thead><tbody id="worstSiswaBody"></tbody></table></div></div>
+      </div>
+      <div class="table-card"><h3>📜 Aktivitas Terbaru</h3><div class="table-wrap"><table><thead><tr><th>Waktu</th><th>Guru</th><th>Kelas</th><th>Mapel</th><th style="text-align:center">H/I/S/A</th></tr></thead><tbody id="activityBody"></tbody></table></div></div>
+    </div>
+    <div id="tabGuru" class="hidden">
+      <div class="action-bar"><button class="btn btn-primary" id="btnAddGuru">➕ Tambah Guru</button></div>
+      <div class="table-card"><h3>👨‍🏫 Daftar Guru</h3><div class="table-wrap"><table><thead><tr><th>NIP</th><th>Nama</th><th>Email</th><th>WA</th><th>Role</th><th style="text-align:center">Aksi</th></tr></thead><tbody id="guruBody"></tbody></table></div></div>
+    </div>
+    <div id="tabKelas" class="hidden">
+      <div class="action-bar"><button class="btn btn-primary" id="btnAddKelas">➕ Tambah Kelas</button></div>
+      <div class="kelas-list" id="kelasList"></div>
+    </div>
+    <div id="tabSiswa" class="hidden">
+      <div class="action-bar">
+        <select id="filterKelasSiswa" style="padding:12px;border:1.5px solid var(--border-2);border-radius:12px;font-family:inherit;background:var(--card-solid);color:var(--text);font-size:13px;font-weight:600"></select>
+        <button class="btn btn-primary" id="btnAddSiswa">➕ Tambah Siswa</button>
+      </div>
+      <div class="table-card"><h3>👥 Daftar Siswa</h3><div class="table-wrap"><table><thead><tr><th>No</th><th>Nama</th><th>NIS</th><th>Kelas</th><th style="text-align:center">Aksi</th></tr></thead><tbody id="siswaBody"></tbody></table></div></div>
+    </div>
+    <div id="tabOrangTua" class="hidden">
+      <div class="action-bar"><button class="btn btn-primary" id="btnAddOrtu">➕ Tambah Akun Orang Tua</button></div>
+      <div class="table-card"><h3>👨‍👩‍👧 Daftar Akun Orang Tua</h3><div class="table-wrap"><table><thead><tr><th>Nama</th><th>Hubungan</th><th>Username</th><th>Email</th><th>WA</th><th>Anak</th><th style="text-align:center">Aksi</th></tr></thead><tbody id="ortuBody"></tbody></table></div></div>
+    </div>
+    <div id="tabPengumuman" class="hidden">
+      <div class="action-bar"><button class="btn btn-primary" id="btnAddPengumuman">➕ Buat Pengumuman</button></div>
+      <div class="table-card"><h3>📢 Daftar Pengumuman</h3><div class="table-wrap"><table><thead><tr><th>Kategori</th><th>Judul</th><th>Tanggal</th><th>Penulis</th><th style="text-align:center">Aksi</th></tr></thead><tbody id="pengumumanBody"></tbody></table></div></div>
+    </div>
+    <div id="tabLaporan" class="hidden">
+      <div class="table-card"><h3>📄 Ringkasan Laporan Bulanan</h3>
+        <div class="form-group"><label>Pilih Bulan</label><input type="month" id="reportMonth"></div>
+        <div id="reportContent"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Guru -->
+<div id="modalGuru" class="modal-overlay hidden"><div class="modal-card">
+  <div class="modal-head"><h3 id="modalGuruTitle">Tambah Guru</h3><button class="modal-close" onclick="closeModalGuru()">✕</button></div>
+  <div class="modal-body">
+    <div class="form-group"><label>NIP *</label><input type="text" id="formGuruNip" maxlength="30"></div>
+    <div class="form-group"><label>Nama Lengkap *</label><input type="text" id="formGuruNama" maxlength="120"></div>
+    <div class="form-group"><label>Email *</label><input type="email" id="formGuruEmail" maxlength="120"></div>
+    <div class="form-group"><label>No WhatsApp * (62xxx)</label><input type="text" id="formGuruWa" maxlength="20"></div>
+    <div class="form-group"><label>Password <small style="color:var(--muted);font-weight:400">(kosongkan jika tidak diubah)</small></label><input type="text" id="formGuruPass"></div>
+    <div class="form-group"><label>Role *</label><select id="formGuruRole"><option value="guru">Guru</option><option value="admin">Admin</option></select></div>
+  </div>
+  <div class="modal-foot"><button class="btn btn-outline" onclick="closeModalGuru()">Batal</button><button class="btn btn-primary" id="saveGuruBtn">💾 Simpan</button></div>
+</div></div>
+
+<!-- Modal Kelas -->
+<div id="modalKelas" class="modal-overlay hidden"><div class="modal-card">
+  <div class="modal-head"><h3 id="modalKelasTitle">Tambah Kelas</h3><button class="modal-close" onclick="closeModalKelas()">✕</button></div>
+  <div class="modal-body">
+    <div class="form-group"><label>Nama Kelas *</label><input type="text" id="formKelasNama" maxlength="40"></div>
+    <div class="form-group"><label>Guru Pengampu *</label><select id="formKelasGuru"></select></div>
+    <div class="form-group"><label>Mapel * (pisahkan koma)</label><input type="text" id="formKelasMapel" maxlength="120"></div>
+  </div>
+  <div class="modal-foot"><button class="btn btn-outline" onclick="closeModalKelas()">Batal</button><button class="btn btn-primary" id="saveKelasBtn">💾 Simpan</button></div>
+</div></div>
+
+<!-- Modal Siswa -->
+<div id="modalSiswa" class="modal-overlay hidden"><div class="modal-card">
+  <div class="modal-head"><h3 id="modalSiswaTitle">Tambah Siswa</h3><button class="modal-close" onclick="closeModalSiswa()">✕</button></div>
+  <div class="modal-body">
+    <div class="form-group"><label>Nama *</label><input type="text" id="formSiswaNama" maxlength="60"></div>
+    <div class="form-group"><label>NIS *</label><input type="text" id="formSiswaNis" maxlength="20"></div>
+    <div class="form-group"><label>Kelas *</label><select id="formSiswaKelas"></select></div>
+  </div>
+  <div class="modal-foot"><button class="btn btn-outline" onclick="closeModalSiswa()">Batal</button><button class="btn btn-primary" id="saveSiswaBtn">💾 Simpan</button></div>
+</div></div>
+
+<!-- Modal Ortu -->
+<div id="modalOrtu" class="modal-overlay hidden"><div class="modal-card">
+  <div class="modal-head"><h3 id="modalOrtuTitle">Tambah Akun Orang Tua</h3><button class="modal-close" onclick="closeModalOrtu()">✕</button></div>
+  <div class="modal-body">
+    <div class="form-group"><label>Nama *</label><input type="text" id="formOrtuNama" maxlength="60"></div>
+    <div class="form-group"><label>Username * (untuk login)</label><input type="text" id="formOrtuUsername" maxlength="30" placeholder="cth: fauzi"></div>
+    <div class="form-group"><label>Hubungan *</label><select id="formOrtuHubungan"><option value="Ayah">Ayah</option><option value="Ibu">Ibu</option><option value="Wali">Wali</option></select></div>
+    <div class="form-group"><label>Email *</label><input type="email" id="formOrtuEmail" maxlength="120"></div>
+    <div class="form-group"><label>No WhatsApp * (62xxx)</label><input type="text" id="formOrtuWa" maxlength="20"></div>
+    <div class="form-group"><label>Password <small style="color:var(--muted);font-weight:400">(kosongkan jika tidak diubah)</small></label><input type="text" id="formOrtuPass"></div>
+    <div class="form-group"><label>Anak Terhubung *</label><div id="formOrtuAnakList" style="max-height:220px;overflow-y:auto;border:1.5px solid var(--border-2);border-radius:12px;padding:10px"></div></div>
+  </div>
+  <div class="modal-foot"><button class="btn btn-outline" onclick="closeModalOrtu()">Batal</button><button class="btn btn-primary" id="saveOrtuBtn">💾 Simpan</button></div>
+</div></div>
+
+<!-- Modal Pengumuman -->
+<div id="modalPengumuman" class="modal-overlay hidden"><div class="modal-card">
+  <div class="modal-head"><h3 id="modalPengumumanTitle">Buat Pengumuman</h3><button class="modal-close" onclick="closeModalPengumuman()">✕</button></div>
+  <div class="modal-body">
+    <div class="form-group"><label>Judul *</label><input type="text" id="formPengumumanJudul" maxlength="120"></div>
+    <div class="form-group"><label>Kategori *</label><select id="formPengumumanKategori"><option value="umum">📌 Umum</option><option value="penting">⚠️ Penting</option><option value="acara">🎉 Acara</option></select></div>
+    <div class="form-group"><label>Tanggal *</label><input type="date" id="formPengumumanTanggal"></div>
+    <div class="form-group"><label>Isi *</label><textarea id="formPengumumanIsi" rows="5"></textarea></div>
+  </div>
+  <div class="modal-foot"><button class="btn btn-outline" onclick="closeModalPengumuman()">Batal</button><button class="btn btn-primary" id="savePengumumanBtn">💾 Simpan</button></div>
+</div></div>
+
+<div id="toast"></div>
+
+<script>
+/* ============ STATE ============ */
+let currentUser = null;
+let charts = {};
+let editingGuruId=null, editingKelasId=null, editingSiswaId=null, editingOrtuId=null, editingPengumumanId=null;
+
+/* ============ STORAGE ============ */
+const getGuru = () => JSON.parse(localStorage.getItem('siabsen_guru') || '[]');
+const getKelas = () => JSON.parse(localStorage.getItem('siabsen_kelas') || '[]');
+const getSiswa = () => JSON.parse(localStorage.getItem('siabsen_siswa') || '[]');
+const getRecords = () => JSON.parse(localStorage.getItem('siabsen_records') || '[]');
+const getOrtu = () => JSON.parse(localStorage.getItem('siabsen_ortu') || '[]');
+const getPengumuman = () => JSON.parse(localStorage.getItem('siabsen_pengumuman') || '[]');
+const saveGuru = a => localStorage.setItem('siabsen_guru', JSON.stringify(a));
+const saveKelas = a => localStorage.setItem('siabsen_kelas', JSON.stringify(a));
+const saveSiswa = a => localStorage.setItem('siabsen_siswa', JSON.stringify(a));
+const saveOrtu = a => localStorage.setItem('siabsen_ortu', JSON.stringify(a));
+const savePengumuman = a => localStorage.setItem('siabsen_pengumuman', JSON.stringify(a));
+const uid = p => p + '_' + Date.now().toString(36) + Math.random().toString(36).slice(2,7);
+
+/* ============ HELPERS ============ */
+const $ = id => document.getElementById(id);
+const todayStr = () => new Date().toISOString().slice(0,10);
+function toast(msg, ms=2400){ const t=$('toast'); t.innerHTML=msg; t.classList.add('show'); clearTimeout(t._to); t._to=setTimeout(()=>t.classList.remove('show'), ms); }
+function escapeHtml(s){ return String(s||'').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function formatTanggal(iso){ return new Date(iso+'T00:00:00').toLocaleDateString('id-ID',{day:'2-digit',month:'short',year:'numeric'}); }
+function normalizeWA(wa){ let s = String(wa||'').replace(/\D/g,''); if (s.startsWith('0')) s='62'+s.slice(1); if (!s.startsWith('62')) s='62'+s; return s; }
+
+/* ============ THEME ============ */
+function applyTheme(t){ document.documentElement.setAttribute('data-theme', t); const b=$('themeToggle'); if(b) b.textContent = t==='dark'?'☀️':'🌙'; localStorage.setItem('siabsen_theme', t); }
+applyTheme(localStorage.getItem('siabsen_theme') || 'light');
+
+/* ============ AUTH ============ */
+(function checkAuth(){
+  const u = JSON.parse(localStorage.getItem('siabsen_user') || 'null');
+  if (!u || u.role !== 'admin') { location.href = 'login.html'; return; }
+  currentUser = u;
+  $('appPage').classList.remove('hidden');
+  initApp();
+})();
+
+/* ============ INIT ============ */
+function initApp(){
+  $('userName').textContent = currentUser.nama;
+  $('userAvatar').textContent = currentUser.nama.charAt(0).toUpperCase();
+  $('themeToggle').onclick = () => { const c = document.documentElement.getAttribute('data-theme'); applyTheme(c==='dark'?'light':'dark'); };
+  $('logoutBtn').onclick = () => { if (!confirm('Keluar?')) return; localStorage.removeItem('siabsen_user'); location.href='login.html'; };
+  document.querySelectorAll('.tab').forEach(t => t.onclick = () => switchTab(t.dataset.tab));
+  $('btnAddGuru').onclick = () => openModalGuru(null);
+  $('saveGuruBtn').onclick = saveGuruForm;
+  $('btnAddKelas').onclick = () => openModalKelas(null);
+  $('saveKelasBtn').onclick = saveKelasForm;
+  $('btnAddSiswa').onclick = () => openModalSiswa(null);
+  $('saveSiswaBtn').onclick = saveSiswaForm;
+  $('btnAddOrtu').onclick = () => openModalOrtu(null);
+  $('saveOrtuBtn').onclick = saveOrtuForm;
+  $('btnAddPengumuman').onclick = () => openModalPengumuman(null);
+  $('savePengumumanBtn').onclick = savePengumumanForm;
+  $('filterKelasSiswa').onchange = renderSiswaList;
+  $('reportMonth').value = todayStr().slice(0,7);
+  $('reportMonth').onchange = renderReport;
+  ['modalGuru','modalKelas','modalSiswa','modalOrtu','modalPengumuman'].forEach(m => {
+    $(m).addEventListener('click', e => { if (e.target.id === m) {
+      if (m==='modalGuru') closeModalGuru();
+      if (m==='modalKelas') closeModalKelas();
+      if (m==='modalSiswa') closeModalSiswa();
+      if (m==='modalOrtu') closeModalOrtu();
+      if (m==='modalPengumuman') closeModalPengumuman();
+    }});
+  });
+  renderDashboard(); renderGuruList(); renderKelasList(); refreshFilterSiswa(); renderSiswaList(); renderOrtuList(); renderPengumumanList(); renderReport();
+}
+function switchTab(tab){
+  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
+  const map = { dashboard:'tabDashboard', guru:'tabGuru', kelas:'tabKelas', siswa:'tabSiswa', ortu:'tabOrangTua', pengumuman:'tabPengumuman', laporan:'tabLaporan' };
+  Object.entries(map).forEach(([k,id]) => $(id).classList.toggle('hidden', k !== tab));
+  if (tab === 'dashboard') renderDashboard();
+  if (tab === 'guru') renderGuruList();
+  if (tab === 'kelas') renderKelasList();
+  if (tab === 'siswa') renderSiswaList();
+  if (tab === 'ortu') renderOrtuList();
+  if (tab === 'pengumuman') renderPengumumanList();
+  if (tab === 'laporan') renderReport();
+}
+
+/* ============ DASHBOARD ============ */
+function renderDashboard(){
+  const gurus = getGuru(), kelas = getKelas(), siswa = getSiswa(), records = getRecords();
+  $('ovGuru').textContent = gurus.filter(g => g.role !== 'admin').length;
+  $('ovKelas').textContent = kelas.length;
+  $('ovSiswa').textContent = siswa.length;
+  const today = todayStr();
+  $('ovAbsen').textContent = records.filter(r => r.tanggal === today).length;
+  $('trendGuru').textContent = `${gurus.filter(g=>g.role==='admin').length} admin`;
+  $('trendKelas').textContent = `${new Set(kelas.map(k=>k.guruNip)).size} pengampu`;
+  $('trendSiswa').textContent = `${kelas.length ? Math.round(siswa.length/kelas.length) : 0}/kls`;
+  $('trendAbsen').textContent = records.length + ' total';
+  renderTrendChart(); renderPieChart(); renderKelasChart(); renderGuruChart();
+  renderTopSiswa(); renderWorstSiswa(); renderActivity();
+}
+function renderTrendChart(){
+  const records = getRecords();
+  const days = 14; const labels = [], dataH = [], dataIS = [], dataA = [];
+  for (let i = days-1; i >= 0; i--) {
+    const d = new Date(); d.setDate(d.getDate() - i);
+    const iso = d.toISOString().slice(0,10);
+    labels.push(d.toLocaleDateString('id-ID', { day:'2-digit', month:'short' }));
+    const recs = records.filter(r => r.tanggal === iso);
+    let H=0, I=0, S=0, A=0;
+    recs.forEach(r => r.students.forEach(s => { if (s.status==='Hadir') H++; else if (s.status==='Izin') I++; else if (s.status==='Sakit') S++; else if (s.status==='Alpha') A++; }));
+    dataH.push(H); dataIS.push(I+S); dataA.push(A);
+  }
+  const ctx = $('chartTrend').getContext('2d');
+  if (charts.trend) charts.trend.destroy();
+  const g1 = ctx.createLinearGradient(0,0,0,300); g1.addColorStop(0,'rgba(16,185,129,.35)'); g1.addColorStop(1,'rgba(16,185,129,0)');
+  charts.trend = new Chart(ctx, {
+    type:'line',
+    data:{ labels, datasets:[
+      { label:'Hadir', data:dataH, borderColor:'#10b981', backgroundColor:g1, borderWidth:2.5, tension:.35, fill:true, pointRadius:4, pointBackgroundColor:'#10b981', pointBorderColor:'#fff', pointBorderWidth:2 },
+      { label:'Izin+Sakit', data:dataIS, borderColor:'#f59e0b', backgroundColor:'transparent', borderWidth:2, tension:.35, pointRadius:3, pointBackgroundColor:'#f59e0b', borderDash:[5,4] },
+      { label:'Alpha', data:dataA, borderColor:'#ef4444', backgroundColor:'transparent', borderWidth:2, tension:.35, pointRadius:3, pointBackgroundColor:'#ef4444' }
+    ]},
+    options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{ position:'bottom', labels:{ usePointStyle:true, padding:16, font:{ family:'Inter', size:11, weight:'600' } } } }, scales:{ y:{ beginAtZero:true, grid:{ color:'rgba(148,163,184,.12)' }, ticks:{ color:'#94a3b8' } }, x:{ grid:{ display:false }, ticks:{ color:'#94a3b8', font:{size:10} } } } }
+  });
+}
+function renderPieChart(){
+  const records = getRecords();
+  const c = { Hadir:0, Izin:0, Sakit:0, Alpha:0 };
+  records.forEach(r => r.students.forEach(s => c[s.status]++));
+  const ctx = $('chartPie').getContext('2d');
+  if (charts.pie) charts.pie.destroy();
+  charts.pie = new Chart(ctx, {
+    type:'doughnut',
+    data:{ labels:['Hadir','Izin','Sakit','Alpha'], datasets:[{ data:[c.Hadir,c.Izin,c.Sakit,c.Alpha], backgroundColor:['#10b981','#06b6d4','#f59e0b','#ef4444'], borderWidth:3, borderColor:'#fff', hoverOffset:12 }] },
+    options:{ responsive:true, maintainAspectRatio:false, cutout:'65%', plugins:{ legend:{ position:'bottom', labels:{ usePointStyle:true, padding:12, font:{ family:'Inter', size:11, weight:'600' } } } } }
+  });
+}
+function renderKelasChart(){
+  const kelas = getKelas(); const records = getRecords();
+  const labels = [], data = [], colors = [];
+  kelas.forEach(k => {
+    const recs = records.filter(r => r.kelasId === k.id);
+    let H=0, tot=0;
+    recs.forEach(r => r.students.forEach(s => { if (s.status==='Hadir') H++; tot++; }));
+    const p = tot ? Math.round(H/tot*100) : 0;
+    labels.push(k.nama); data.push(p);
+    colors.push(p>=90?'#10b981':p>=75?'#f59e0b':'#ef4444');
+  });
+  const ctx = $('chartKelas').getContext('2d');
+  if (charts.kelas) charts.kelas.destroy();
+  charts.kelas = new Chart(ctx, {
+    type:'bar',
+    data:{ labels, datasets:[{ label:'% Kehadiran', data, backgroundColor:colors, borderRadius:10, barPercentage:.7 }] },
+    options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{ display:false } }, scales:{ y:{ beginAtZero:true, max:100, grid:{ color:'rgba(148,163,184,.12)' }, ticks:{ color:'#94a3b8', callback:v=>v+'%' } }, x:{ grid:{ display:false }, ticks:{ color:'#94a3b8', font:{ size:10 } } } } }
+  });
+}
+function renderGuruChart(){
+  const gurus = getGuru().filter(g => g.role !== 'admin');
+  const records = getRecords();
+  const labels = [], data = [];
+  gurus.forEach(g => { labels.push(g.nama.split(',')[0].split(' ').slice(0,2).join(' ')); data.push(records.filter(r => r.guru === g.nip).length); });
+  const ctx = $('chartGuru').getContext('2d');
+  if (charts.guru) charts.guru.destroy();
+  charts.guru = new Chart(ctx, {
+    type:'bar',
+    data:{ labels, datasets:[{ label:'Sesi', data, backgroundColor:'rgba(99,102,241,.85)', borderRadius:10, barPercentage:.65 }] },
+    options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{ display:false } }, scales:{ y:{ beginAtZero:true, grid:{ color:'rgba(148,163,184,.12)' }, ticks:{ color:'#94a3b8' } }, x:{ grid:{ display:false }, ticks:{ color:'#94a3b8', font:{ size:10 } } } } }
+  });
+}
+function renderTopSiswa(){
+  const siswa = getSiswa(); const kelasMap = {}; getKelas().forEach(k => kelasMap[k.id]=k.nama);
+  const records = getRecords();
+  const stats = siswa.map(s => {
+    let H=0, tot=0;
+    records.forEach(r => { if (r.kelasId === s.kelasId) { const rec = r.students.find(x => x.nis === s.nis); if (rec) { if (rec.status === 'Hadir') H++; tot++; } } });
+    return { ...s, persen: tot ? Math.round(H/tot*100) : 0, tot };
+  }).filter(s => s.tot >= 1).sort((a,b) => b.persen - a.persen).slice(0, 5);
+  const body = $('topSiswaBody');
+  if (!stats.length) body.innerHTML = `<tr><td colspan="4" style="text-align:center;color:var(--muted);padding:30px">Belum ada data</td></tr>`;
+  else body.innerHTML = stats.map((s, i) => { const cls = i===0?'rank-1':i===1?'rank-2':i===2?'rank-3':'rank-n'; return `<tr><td><span class="rank-badge ${cls}">${i+1}</span></td><td><b>${escapeHtml(s.nama)}</b></td><td>${escapeHtml(kelasMap[s.kelasId]||'-')}</td><td style="text-align:center"><span class="pill h">${s.persen}%</span></td></tr>`; }).join('');
+}
+function renderWorstSiswa(){
+  const siswa = getSiswa(); const kelasMap = {}; getKelas().forEach(k => kelasMap[k.id]=k.nama);
+  const records = getRecords();
+  const stats = siswa.map(s => {
+    let A=0;
+    records.forEach(r => { if (r.kelasId === s.kelasId) { const rec = r.students.find(x => x.nis === s.nis); if (rec && rec.status === 'Alpha') A++; } });
+    return { ...s, alpha: A };
+  }).filter(s => s.alpha > 0).sort((a,b) => b.alpha - a.alpha).slice(0, 5);
+  const body = $('worstSiswaBody');
+  if (!stats.length) body.innerHTML = `<tr><td colspan="4" style="text-align:center;color:var(--muted);padding:30px">🎉 Tidak ada Alpha</td></tr>`;
+  else body.innerHTML = stats.map((s, i) => { const cls = i===0?'rank-1':i===1?'rank-2':i===2?'rank-3':'rank-n'; return `<tr><td><span class="rank-badge ${cls}">${i+1}</span></td><td><b>${escapeHtml(s.nama)}</b></td><td>${escapeHtml(kelasMap[s.kelasId]||'-')}</td><td style="text-align:center"><span class="pill a">${s.alpha}x</span></td></tr>`; }).join('');
+}
+function renderActivity(){
+  const records = getRecords().slice().sort((a,b) => new Date(b.savedAt||0) - new Date(a.savedAt||0)).slice(0, 10);
+  const body = $('activityBody');
+  if (!records.length) body.innerHTML = `<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:30px">Belum ada aktivitas</td></tr>`;
+  else body.innerHTML = records.map(r => { const c = {Hadir:0,Izin:0,Sakit:0,Alpha:0}; r.students.forEach(s => c[s.status]++); const w = r.savedAt ? new Date(r.savedAt).toLocaleString('id-ID',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}) : '-'; return `<tr><td><small>${w}</small></td><td>${escapeHtml(r.guruNama||'-')}</td><td><b>${escapeHtml(r.kelas)}</b></td><td>${escapeHtml(r.mapel)}</td><td style="text-align:center;white-space:nowrap"><span class="pill h">${c.Hadir}</span><span class="pill i">${c.Izin}</span><span class="pill s">${c.Sakit}</span><span class="pill a">${c.Alpha}</span></td></tr>`; }).join('');
+}
+
+/* ============ GURU CRUD ============ */
+function renderGuruList(){
+  const list = getGuru(); const body = $('guruBody');
+  if (!list.length) { body.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:30px;color:var(--muted)">Belum ada guru</td></tr>`; return; }
+  body.innerHTML = list.map(g => `<tr>
+    <td><code style="background:rgba(99,102,241,.1);padding:3px 8px;border-radius:6px;font-size:11px;color:var(--primary)">${escapeHtml(g.nip)}</code></td>
+    <td><b>${escapeHtml(g.nama)}</b></td>
+    <td><small>${escapeHtml(g.email)}</small></td>
+    <td><small>${escapeHtml(g.wa||'-')}</small></td>
+    <td>${g.role === 'admin' ? '<span class="pill s">👑 Admin</span>' : '<span class="pill h">Guru</span>'}</td>
+    <td style="text-align:center;white-space:nowrap">
+      <button class="btn-mini btn-mini-edit" onclick="openModalGuru('${escapeHtml(g.nip)}')">✏️</button>
+      ${g.role !== 'admin' ? `<button class="btn-mini btn-mini-del" onclick="deleteGuru('${escapeHtml(g.nip)}')">🗑️</button>` : ''}
+    </td>
+  </tr>`).join('');
+}
+function openModalGuru(nip){
+  editingGuruId = nip;
+  $('modalGuruTitle').textContent = nip ? 'Edit Guru' : 'Tambah Guru';
+  if (nip) { const g = getGuru().find(x => x.nip === nip); if (g) { $('formGuruNip').value=g.nip; $('formGuruNama').value=g.nama; $('formGuruEmail').value=g.email; $('formGuruWa').value=g.wa||''; $('formGuruPass').value=''; $('formGuruRole').value=g.role||'guru'; $('formGuruNip').disabled = true; } }
+  else { $('formGuruNip').value=''; $('formGuruNama').value=''; $('formGuruEmail').value=''; $('formGuruWa').value=''; $('formGuruPass').value=''; $('formGuruRole').value='guru'; $('formGuruNip').disabled = false; }
+  $('modalGuru').classList.remove('hidden');
+  setTimeout(() => $('formGuruNip').focus(), 150);
+}
+function closeModalGuru(){ $('modalGuru').classList.add('hidden'); editingGuruId=null; }
+function saveGuruForm(){
+  const nip = $('formGuruNip').value.trim();
+  const nama = $('formGuruNama').value.trim();
+  const email = $('formGuruEmail').value.trim();
+  const wa = normalizeWA($('formGuruWa').value.trim());
+  const pass = $('formGuruPass').value.trim();
+  const role = $('formGuruRole').value;
+  if (!nip || !nama || !email || !wa) return toast('⚠️ Lengkapi data');
+  if (!editingGuruId && (!pass || pass.length < 6)) return toast('⚠️ Password min 6 karakter');
+  const list = getGuru();
+  if (editingGuruId) {
+    const idx = list.findIndex(g => g.nip === editingGuruId);
+    if (idx < 0) return;
+    list[idx] = { ...list[idx], nama, email, wa, role };
+    if (pass) list[idx].password = pass;
+    toast('✅ Diperbarui');
+  } else {
+    if (list.some(g => g.nip === nip)) return toast('⚠️ NIP sudah ada');
+    list.push({ nip, nama, email, wa, password: pass, role });
+    toast('✅ Ditambahkan');
+  }
+  saveGuru(list); closeModalGuru(); renderGuruList(); renderDashboard();
+}
+function deleteGuru(nip){
+  const g = getGuru().find(x => x.nip === nip); if (!g) return;
+  if (g.role === 'admin') return toast('⚠️ Admin tidak bisa dihapus');
+  if (!confirm(`Hapus guru "${g.nama}"?`)) return;
+  saveGuru(getGuru().filter(x => x.nip !== nip)); toast('🗑️ Dihapus'); renderGuruList(); renderDashboard();
+}
+
+/* ============ KELAS CRUD ============ */
+function renderKelasList(){
+  const list = getKelas(); const c = $('kelasList');
+  if (!list.length) { c.innerHTML = `<div class="empty" style="grid-column:1/-1"><div class="ico">🏫</div><p>Belum ada kelas</p></div>`; return; }
+  const guruList = getGuru(), siswaList = getSiswa();
+  c.innerHTML = list.map(k => {
+    const guru = guruList.find(g => g.nip === k.guruNip);
+    const jml = siswaList.filter(s => s.kelasId === k.id).length;
+    return `<div class="kelas-card">
+      <div class="kelas-head"><div class="kelas-icon">🏫</div>
+        <div class="kelas-info"><div class="kelas-nama">${escapeHtml(k.nama)}</div><div class="kelas-guru">👨‍🏫 ${escapeHtml(guru?guru.nama:'—')}</div></div>
+        <div class="kelas-actions"><button class="btn-mini btn-mini-edit" onclick="openModalKelas('${k.id}')">✏️</button><button class="btn-mini btn-mini-del" onclick="deleteKelas('${k.id}')">🗑️</button></div>
+      </div>
+      <div class="kelas-meta">${(k.mapel||[]).map(m => `<span class="badge-mapel">📖 ${escapeHtml(m)}</span>`).join('')}<span class="badge-siswa">👥 ${jml} murid</span></div>
+    </div>`;
+  }).join('');
+}
+function refreshGuruDropdown(){
+  const sel = $('formKelasGuru'); if (!sel) return;
+  const list = getGuru().filter(g => g.role !== 'admin');
+  sel.innerHTML = list.length ? list.map(g => `<option value="${g.nip}">${escapeHtml(g.nama)}</option>`).join('') : '<option value="">—</option>';
+}
+function openModalKelas(id){
+  editingKelasId = id;
+  $('modalKelasTitle').textContent = id?'Edit Kelas':'Tambah Kelas';
+  refreshGuruDropdown();
+  if (id) { const k = getKelas().find(x => x.id === id); if (k) { $('formKelasNama').value=k.nama; $('formKelasGuru').value=k.guruNip; $('formKelasMapel').value=(k.mapel||[]).join(', '); } }
+  else { $('formKelasNama').value=''; $('formKelasMapel').value=''; }
+  $('modalKelas').classList.remove('hidden');
+}
+function closeModalKelas(){ $('modalKelas').classList.add('hidden'); editingKelasId=null; }
+function saveKelasForm(){
+  const nama = $('formKelasNama').value.trim();
+  const guruNip = $('formKelasGuru').value;
+  const mapelRaw = $('formKelasMapel').value.trim();
+  if (!nama || !guruNip || !mapelRaw) return toast('⚠️ Lengkapi data');
+  const mapel = mapelRaw.split(',').map(m=>m.trim()).filter(Boolean);
+  const list = getKelas();
+  if (list.find(k => k.nama.toLowerCase() === nama.toLowerCase() && k.id !== editingKelasId)) return toast('⚠️ Nama sudah ada');
+  if (editingKelasId) { const idx = list.findIndex(x => x.id === editingKelasId); list[idx] = { ...list[idx], nama, guruNip, mapel }; toast('✅ Diperbarui'); }
+  else { list.push({ id:uid('K'), nama, guruNip, mapel }); toast('✅ Ditambahkan'); }
+  saveKelas(list); closeModalKelas(); renderKelasList(); renderDashboard(); refreshFilterSiswa();
+}
+function deleteKelas(id){
+  const k = getKelas().find(x => x.id === id); if (!k) return;
+  const jml = getSiswa().filter(s => s.kelasId === id).length;
+  if (!confirm(`Hapus kelas "${k.nama}"?${jml?`\n${jml} murid akan terhapus`:''}`)) return;
+  saveKelas(getKelas().filter(x => x.id !== id));
+  if (jml) saveSiswa(getSiswa().filter(s => s.kelasId !== id));
+  toast('🗑️ Dihapus'); renderKelasList(); renderDashboard(); refreshFilterSiswa(); renderSiswaList();
+}
+
+/* ============ SISWA CRUD ============ */
+function refreshFilterSiswa(){
+  const sel = $('filterKelasSiswa'); const prev = sel.value;
+  sel.innerHTML = '<option value="">Semua Kelas</option>' + getKelas().map(k => `<option value="${k.id}">${escapeHtml(k.nama)}</option>`).join('');
+  if (prev) sel.value = prev;
+}
+function renderSiswaList(){
+  const kelasId = $('filterKelasSiswa').value;
+  const list = getSiswa().filter(s => !kelasId || s.kelasId === kelasId).sort((a,b)=>a.nama.localeCompare(b.nama,'id'));
+  const kelasMap = {}; getKelas().forEach(k => kelasMap[k.id]=k.nama);
+  const body = $('siswaBody');
+  if (!list.length) { body.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:30px;color:var(--muted)">Belum ada siswa</td></tr>`; return; }
+  body.innerHTML = list.map((s,i) => `<tr><td>${i+1}</td><td><b>${escapeHtml(s.nama)}</b></td><td><code style="background:rgba(148,163,184,.12);padding:3px 8px;border-radius:6px;font-size:11px">${escapeHtml(s.nis)}</code></td><td>${escapeHtml(kelasMap[s.kelasId]||'-')}</td><td style="text-align:center;white-space:nowrap"><button class="btn-mini btn-mini-edit" onclick="openModalSiswa('${s.id}')">✏️</button><button class="btn-mini btn-mini-del" onclick="deleteSiswa('${s.id}')">🗑️</button></td></tr>`).join('');
+}
+function openModalSiswa(id){
+  editingSiswaId = id;
+  $('modalSiswaTitle').textContent = id?'Edit Siswa':'Tambah Siswa';
+  const kelasList = getKelas();
+  $('formSiswaKelas').innerHTML = kelasList.length ? kelasList.map(k => `<option value="${k.id}">${escapeHtml(k.nama)}</option>`).join('') : '<option value="">—</option>';
+  if (id) { const s = getSiswa().find(x => x.id === id); if (s) { $('formSiswaNama').value=s.nama; $('formSiswaNis').value=s.nis; $('formSiswaKelas').value=s.kelasId; } }
+  else { $('formSiswaNama').value=''; $('formSiswaNis').value=''; const fk=$('filterKelasSiswa').value; if (fk) $('formSiswaKelas').value = fk; }
+  $('modalSiswa').classList.remove('hidden');
+}
+function closeModalSiswa(){ $('modalSiswa').classList.add('hidden'); editingSiswaId=null; }
+function saveSiswaForm(){
+  const nama = $('formSiswaNama').value.trim();
+  const nis = $('formSiswaNis').value.trim();
+  const kelasId = $('formSiswaKelas').value;
+  if (!nama || !nis || !kelasId) return toast('⚠️ Lengkapi data');
+  const list = getSiswa();
+  if (list.find(s => s.nis === nis && s.id !== editingSiswaId)) return toast('⚠️ NIS sudah ada');
+  if (editingSiswaId) { const idx = list.findIndex(x => x.id === editingSiswaId); list[idx] = { ...list[idx], nama, nis, kelasId }; toast('✅ Diperbarui'); }
+  else { list.push({ id:uid('S'), nama, nis, kelasId }); toast('✅ Ditambahkan'); }
+  saveSiswa(list); closeModalSiswa(); renderSiswaList(); renderDashboard(); renderKelasList();
+}
+function deleteSiswa(id){
+  const s = getSiswa().find(x => x.id === id); if (!s) return;
+  if (!confirm(`Hapus siswa "${s.nama}"?`)) return;
+  saveSiswa(getSiswa().filter(x => x.id !== id)); toast('🗑️ Dihapus'); renderSiswaList(); renderDashboard(); renderKelasList();
+}
+
+/* ============ ORTU CRUD ============ */
+function renderOrtuList(){
+  const list = getOrtu(); const siswa = getSiswa();
+  const body = $('ortuBody');
+  if (!list.length) { body.innerHTML = `<tr><td colspan="7" style="text-align:center;padding:30px;color:var(--muted)">Belum ada akun ortu</td></tr>`; return; }
+  body.innerHTML = list.map(o => {
+    const anakNames = (o.anakNis||[]).map(nis => { const s = siswa.find(x => x.nis === nis); return s ? s.nama : nis; }).join(', ') || '—';
+    return `<tr>
+      <td><b>${escapeHtml(o.nama)}</b></td>
+      <td><span class="pill h">${escapeHtml(o.hubungan)}</span></td>
+      <td><code style="background:rgba(99,102,241,.1);padding:3px 8px;border-radius:6px;font-size:11px;color:var(--primary)">${escapeHtml(o.username||'-')}</code></td>
+      <td><small>${escapeHtml(o.email)}</small></td>
+      <td><small>${escapeHtml(o.wa||o.hp||'-')}</small></td>
+      <td><small>${escapeHtml(anakNames)}</small></td>
+      <td style="text-align:center;white-space:nowrap">
+        <button class="btn-mini btn-mini-edit" onclick="openModalOrtu('${o.id}')">✏️</button>
+        <button class="btn-mini btn-mini-del" onclick="deleteOrtu('${o.id}')">🗑️</button>
+      </td>
+    </tr>`;
+  }).join('');
+}
+function renderFormOrtuAnak(selected){
+  const wrap = $('formOrtuAnakList');
+  const siswa = getSiswa().slice().sort((a,b) => a.nama.localeCompare(b.nama,'id'));
+  const kelasMap = {}; getKelas().forEach(k => kelasMap[k.id] = k.nama);
+  if (!siswa.length) { wrap.innerHTML = `<div style="text-align:center;color:var(--muted);font-size:13px;padding:14px">Belum ada siswa.</div>`; return; }
+  wrap.innerHTML = siswa.map(s => {
+    const checked = (selected||[]).includes(s.nis) ? 'checked' : '';
+    return `<label style="display:flex;align-items:center;gap:10px;padding:8px 6px;cursor:pointer;font-size:13px">
+      <input type="checkbox" value="${escapeHtml(s.nis)}" ${checked} style="width:16px;height:16px;accent-color:#6366f1;cursor:pointer">
+      <span style="flex:1"><b>${escapeHtml(s.nama)}</b></span>
+      <small style="color:var(--muted)">${escapeHtml(kelasMap[s.kelasId]||'')}</small>
+    </label>`;
+  }).join('');
+}
+function openModalOrtu(id){
+  editingOrtuId = id;
+  $('modalOrtuTitle').textContent = id ? 'Edit Akun Orang Tua' : 'Tambah Akun Orang Tua';
+  if (id) { const o = getOrtu().find(x => x.id === id); if (o) { $('formOrtuNama').value=o.nama; $('formOrtuUsername').value=o.username||''; $('formOrtuHubungan').value=o.hubungan||'Ayah'; $('formOrtuEmail').value=o.email; $('formOrtuWa').value=o.wa||''; $('formOrtuPass').value=''; renderFormOrtuAnak(o.anakNis||[]); } }
+  else { $('formOrtuNama').value=''; $('formOrtuUsername').value=''; $('formOrtuHubungan').value='Ayah'; $('formOrtuEmail').value=''; $('formOrtuWa').value=''; $('formOrtuPass').value=''; renderFormOrtuAnak([]); }
+  $('modalOrtu').classList.remove('hidden');
+}
+function closeModalOrtu(){ $('modalOrtu').classList.add('hidden'); editingOrtuId=null; }
+function saveOrtuForm(){
+  const nama = $('formOrtuNama').value.trim();
+  const username = $('formOrtuUsername').value.trim().toLowerCase();
+  const hubungan = $('formOrtuHubungan').value;
+  const email = $('formOrtuEmail').value.trim().toLowerCase();
+  const wa = normalizeWA($('formOrtuWa').value.trim());
+  const pass = $('formOrtuPass').value.trim();
+  const anakNis = Array.from($('formOrtuAnakList').querySelectorAll('input[type="checkbox"]:checked')).map(cb => cb.value);
+  if (!nama || !username || !email || !wa) return toast('⚠️ Lengkapi data');
+  if (!editingOrtuId && (!pass || pass.length < 6)) return toast('⚠️ Password min 6 karakter');
+  if (!anakNis.length) return toast('⚠️ Pilih minimal 1 anak');
+  const list = getOrtu();
+  if (list.find(o => (o.email === email || o.wa === wa || o.username === username) && o.id !== editingOrtuId)) return toast('⚠️ Email/WA/Username sudah ada');
+  if (editingOrtuId) {
+    const idx = list.findIndex(o => o.id === editingOrtuId);
+    list[idx] = { ...list[idx], nama, username, hubungan, email, wa, hp: wa, anakNis };
+    if (pass) list[idx].password = pass;
+    toast('✅ Diperbarui');
+  } else {
+    list.push({ id:uid('O'), nama, username, hubungan, email, wa, hp: wa, password: pass, anakNis });
+    toast('✅ Ditambahkan');
+  }
+  saveOrtu(list); closeModalOrtu(); renderOrtuList();
+}
+function deleteOrtu(id){
+  const o = getOrtu().find(x => x.id === id); if (!o) return;
+  if (!confirm(`Hapus akun "${o.nama}"?`)) return;
+  saveOrtu(getOrtu().filter(x => x.id !== id)); toast('🗑️ Dihapus'); renderOrtuList();
+}
+
+/* ============ PENGUMUMAN CRUD ============ */
+function renderPengumumanList(){
+  const list = getPengumuman().slice().sort((a,b) => b.tanggal.localeCompare(a.tanggal));
+  const tbody = $('pengumumanBody');
+  const lbl = { umum:'📌 Umum', penting:'⚠️ Penting', acara:'🎉 Acara' };
+  const cls = { umum:'h', penting:'a', acara:'s' };
+  if (!list.length) { tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:30px;color:var(--muted)">Belum ada pengumuman</td></tr>`; return; }
+  tbody.innerHTML = list.map(p => `<tr>
+    <td><span class="pill ${cls[p.kategori]||'h'}">${lbl[p.kategori]||p.kategori}</span></td>
+    <td><b>${escapeHtml(p.judul)}</b><br><small style="color:var(--muted)">${escapeHtml(p.isi.slice(0,80))}${p.isi.length>80?'...':''}</small></td>
+    <td><small>${formatTanggal(p.tanggal)}</small></td>
+    <td><small>${escapeHtml(p.author||'Admin')}</small></td>
+    <td style="text-align:center;white-space:nowrap">
+      <button class="btn-mini btn-mini-edit" onclick="openModalPengumuman('${p.id}')">✏️</button>
+      <button class="btn-mini btn-mini-del" onclick="deletePengumuman('${p.id}')">🗑️</button>
+    </td>
+  </tr>`).join('');
+}
+function openModalPengumuman(id){
+  editingPengumumanId = id;
+  $('modalPengumumanTitle').textContent = id ? 'Edit Pengumuman' : 'Buat Pengumuman';
+  if (id) { const p = getPengumuman().find(x => x.id === id); if (p) { $('formPengumumanJudul').value=p.judul; $('formPengumumanKategori').value=p.kategori; $('formPengumumanTanggal').value=p.tanggal; $('formPengumumanIsi').value=p.isi; } }
+  else { $('formPengumumanJudul').value=''; $('formPengumumanKategori').value='umum'; $('formPengumumanTanggal').value=todayStr(); $('formPengumumanIsi').value=''; }
+  $('modalPengumuman').classList.remove('hidden');
+}
+function closeModalPengumuman(){ $('modalPengumuman').classList.add('hidden'); editingPengumumanId=null; }
+function savePengumumanForm(){
+  const judul = $('formPengumumanJudul').value.trim();
+  const kategori = $('formPengumumanKategori').value;
+  const tanggal = $('formPengumumanTanggal').value;
+  const isi = $('formPengumumanIsi').value.trim();
+  if (!judul || !tanggal || !isi) return toast('⚠️ Lengkapi data');
+  const list = getPengumuman();
+  if (editingPengumumanId) { const idx = list.findIndex(p => p.id === editingPengumumanId); list[idx] = { ...list[idx], judul, kategori, tanggal, isi }; toast('✅ Diperbarui'); }
+  else { list.push({ id:uid('P'), judul, kategori, tanggal, isi, author: currentUser.nama }); toast('✅ Dibuat'); }
+  savePengumuman(list); closeModalPengumuman(); renderPengumumanList();
+}
+function deletePengumuman(id){
+  if (!confirm('Hapus pengumuman ini?')) return;
+  savePengumuman(getPengumuman().filter(p => p.id !== id)); toast('🗑️ Dihapus'); renderPengumumanList();
+}
+
+/* ============ LAPORAN BULANAN ============ */
+function renderReport(){
+  const month = $('reportMonth').value;
+  if (!month) return;
+  const [y, m] = month.split('-').map(Number);
+  const start = `${y}-${String(m).padStart(2,'0')}-01`;
+  const lastDay = new Date(y, m, 0).getDate();
+  const end = `${y}-${String(m).padStart(2,'0')}-${String(lastDay).padStart(2,'0')}`;
+  const records = getRecords().filter(r => r.tanggal >= start && r.tanggal <= end);
+  const kelasList = getKelas();
+  const blnLbl = new Date(y, m-1).toLocaleDateString('id-ID', { month:'long', year:'numeric' });
+  if (!records.length) { $('reportContent').innerHTML = `<div class="empty"><div class="ico">📭</div><p>Belum ada data di bulan <b>${blnLbl}</b>.</p></div>`; return; }
+  const perKelas = kelasList.map(k => {
+    const recs = records.filter(r => r.kelasId === k.id);
+    let H=0,I=0,S=0,A=0;
+    recs.forEach(r => r.students.forEach(s => { if (s.status==='Hadir') H++; else if (s.status==='Izin') I++; else if (s.status==='Sakit') S++; else if (s.status==='Alpha') A++; }));
+    const tot = H+I+S+A;
+    return { nama:k.nama, H,I,S,A, tot, pertemuan: recs.length, persen: tot ? Math.round(H/tot*100) : 0 };
+  });
+  const grand = perKelas.reduce((a,k) => ({ H:a.H+k.H, I:a.I+k.I, S:a.S+k.S, A:a.A+k.A, tot:a.tot+k.tot, pertemuan: a.pertemuan+k.pertemuan }), { H:0,I:0,S:0,A:0,tot:0,pertemuan:0 });
+  const gp = grand.tot ? Math.round(grand.H/grand.tot*100) : 0;
+  $('reportContent').innerHTML = `
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:16px">
+      <div class="ov-card" style="--accent:#10b981"><div class="ov-value" style="color:#10b981">${gp}%</div><div class="ov-label">Kehadiran</div></div>
+      <div class="ov-card" style="--accent:#6366f1"><div class="ov-value" style="color:#6366f1">${grand.pertemuan}</div><div class="ov-label">Pertemuan</div></div>
+      <div class="ov-card" style="--accent:#06b6d4"><div class="ov-value" style="color:#06b6d4">${grand.tot}</div><div class="ov-label">Kehadiran</div></div>
+      <div class="ov-card" style="--accent:#ef4444"><div class="ov-value" style="color:#ef4444">${grand.A}</div><div class="ov-label">Alpha</div></div>
+    </div>
+    <div class="table-wrap"><table>
+      <thead><tr><th>Kelas</th><th style="text-align:center">Pertemuan</th><th style="text-align:center">H</th><th style="text-align:center">I</th><th style="text-align:center">S</th><th style="text-align:center">A</th><th style="text-align:center">% Hadir</th></tr></thead>
+      <tbody>
+        ${perKelas.map(k => `<tr><td><b>${escapeHtml(k.nama)}</b></td><td style="text-align:center">${k.pertemuan}</td><td style="text-align:center"><span class="pill h">${k.H}</span></td><td style="text-align:center"><span class="pill i">${k.I}</span></td><td style="text-align:center"><span class="pill s">${k.S}</span></td><td style="text-align:center"><span class="pill a">${k.A}</span></td><td style="text-align:center"><b>${k.persen}%</b></td></tr>`).join('')}
+        <tr style="background:rgba(99,102,241,.05);font-weight:700"><td><b>TOTAL</b></td><td style="text-align:center"><b>${grand.pertemuan}</b></td><td style="text-align:center"><b>${grand.H}</b></td><td style="text-align:center"><b>${grand.I}</b></td><td style="text-align:center"><b>${grand.S}</b></td><td style="text-align:center"><b>${grand.A}</b></td><td style="text-align:center"><b>${gp}%</b></td></tr>
+      </tbody>
+    </table></div>`;
+}
+</script>
+<script src="notif.js"></script>
+</body>
+</html>
