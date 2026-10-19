@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="theme-color" content="#4f46e5">
+<meta name="theme-color" content="#065f46">
 <link rel="manifest" href="manifest.json">
 <title>SIABSEN — Admin IRSYADUL ULUM</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -104,6 +104,21 @@ tbody tr:hover { background:rgba(99,102,241,.04); }
 .empty .ico { font-size:60px; margin-bottom:14px; opacity:.4; }
 @media (max-width:900px) { .charts-grid { grid-template-columns:1fr; } .row-2col { grid-template-columns:1fr; } }
 @media (max-width:640px) { .content { padding:14px; } .overview-grid { grid-template-columns:1fr 1fr; gap:10px; } .ov-value { font-size:24px; } .uname { display:none; } .tab { min-width:90px; font-size:11px; } .chart-wrap { min-height:220px; } }
+/* SIABSEN modern theme */
+:root { --primary:#047857; --primary-2:#10b981; --primary-dark:#065f46; --bg:#f4f8f7; --border:rgba(15,118,110,.14); --border-2:rgba(100,116,139,.25); --shadow-sm:0 2px 8px rgba(15,23,42,.05); --shadow-md:0 8px 24px rgba(15,23,42,.07); --shadow-lg:0 16px 36px rgba(15,23,42,.1); }
+body::before { background:radial-gradient(850px circle at 8% 0%,rgba(16,185,129,.12),transparent 42%),radial-gradient(700px circle at 95% 95%,rgba(6,182,212,.08),transparent 40%); }
+.topbar { background:linear-gradient(120deg,#064e3b,#047857 62%,#0f766e)!important; box-shadow:0 8px 24px rgba(6,95,70,.18)!important; }
+.tab.active { background:linear-gradient(135deg,#047857,#10b981)!important; box-shadow:0 6px 16px rgba(4,120,87,.22)!important; }
+.stat-card,.ov-card,.chart-card,.table-card,.filter-bar,.welcome-card,.child-card,.announce-card,.profile-header,.info-list { box-shadow:var(--shadow-sm); }
+input,select,textarea { border-radius:12px; }
+button { -webkit-tap-highlight-color:transparent; }
+@media (max-width:680px) {
+  .content { padding-bottom:calc(100px + env(safe-area-inset-bottom))!important; }
+  .tabs { position:fixed; left:10px; right:10px; bottom:calc(8px + env(safe-area-inset-bottom)); z-index:100; margin:0!important; padding:6px; gap:4px; border-radius:18px; background:rgba(255,255,255,.94); border:1px solid rgba(148,163,184,.2); box-shadow:0 12px 36px rgba(15,23,42,.18); backdrop-filter:blur(18px); -webkit-backdrop-filter:blur(18px); overflow-x:auto; overscroll-behavior-x:contain; scrollbar-width:none; }
+  .tabs::-webkit-scrollbar { display:none; }
+  .tab { flex:0 0 auto; min-width:76px!important; max-width:110px; min-height:48px; padding:8px 10px!important; font-size:10.5px!important; line-height:1.2; white-space:normal!important; }
+  .tab.active { border-radius:13px; }
+}
 </style>
 </head>
 <body>
